@@ -7,6 +7,9 @@ import time
 import logging
 
 API_TOKEN = ''
+CHAT_ID = ''
+PATH = ''
+
 logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 bot = Bot(token=API_TOKEN)
@@ -14,11 +17,11 @@ dp = Dispatcher(bot)
 x=0
 
 async def add_post(current_datetime):
-    filename_list = glob.glob('')
+    filename_list = glob.glob(PATH)
     filename = filename_list[0]
     photo = open(filename, 'rb')
     logging.info('Пост опубликован')
-    await bot.send_photo(-1001386365789, photo, caption=current_datetime)
+    await bot.send_photo(CHAT_ID, photo, caption=current_datetime)
     photo.close()
     os.remove(filename)
 
