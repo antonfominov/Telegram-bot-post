@@ -5,10 +5,14 @@ import glob
 from datetime import datetime
 import time
 import logging
+import configparser
 
-API_TOKEN = '' // токен бота из botfather
-CHAT_ID = '' // id канала
-PATH = '' // путь к файлам в формате ['/app/photo/*']
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+API_TOKEN = config.get('DEFAULT', 'API_TOKEN')
+CHAT_ID = config["DEFAULT"]["CHAT_ID"]
+PATH = config["DEFAULT"]["PATH"]
 
 logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
@@ -16,7 +20,7 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 x=11
 
-async def add_post(current_datetime):
+async def add_photo(time):
     filename_list = glob.glob(PATH)
     filename = filename_list[0]
     photo = open(filename, 'rb')
@@ -41,28 +45,28 @@ async def start_post(x):
         time = datetime.now()
         if time.hour==7 and x==0:
             x=7
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         elif time.hour==9 and x==7:
             x=9
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         elif time.hour==11 and x==9:
             x=11
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         elif time.hour==15 and x==11:
             x=15
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         elif time.hour==17 and x==15:
             x=17
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         elif time.hour==19 and x==17:
             x=19
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         elif time.hour==21 and x==19:
             x=21
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         elif time.hour==23 and x==21:
             x=0
-            await asyncio.create_task(add_post(time))
+            await asyncio.create_task(add_photo(time))
         await asyncio.sleep(1200) #Работает! Можно попасть в бесконечный цикл
         
 @dp.message_handler(commands=['start', 'help'])
