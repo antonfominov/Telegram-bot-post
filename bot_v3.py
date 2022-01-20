@@ -126,8 +126,8 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(commands=['status'])
 async def send_status(message: types.Message):
-    logging.info(message)
-    await message.reply(f'Я всё еще жив! Время: {datetime.now().hour}, x:{x}')
+    with open('app.log', 'rb') as doc:
+        await message.reply_document(doc)
 
 @dp.message_handler(commands=['test'])
 async def send_test(message: types.Message):
