@@ -28,19 +28,21 @@ dp = Dispatcher(bot)
 x=0
 
 async def add_photo(channel, path):
-    filename_list = glob.glob(path)
-    filename = filename_list[0]
-    file = open(filename, 'rb')
-    
-    if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-        await bot.send_photo(channel, file)
-    elif filename.lower().endswith('.gif'):
-        await bot.send_animation(channel, file)
-    
-    logging.info('Пост опубликован')
-    
-    file.close()
-    os.remove(filename)
+    try:
+        filename_list = glob.glob(path)
+        filename = filename_list[0]
+        file = open(filename, 'rb')
+    except Exception:
+        print(f'Директория пуста: {path}')
+        logging.info(f'Директория пуста: {path}')
+    else:
+        if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            await bot.send_photo(channel, file)
+        elif filename.lower().endswith('.gif'):
+            await bot.send_animation(channel, file)
+        logging.info('Пост опубликован')
+        file.close()
+        os.remove(filename)
 
 async def add_gif(time):
     filename_list = glob.glob(path)
@@ -52,8 +54,6 @@ async def add_gif(time):
     os.remove(filename)
     
 async def start_post(x):
-    print('Цикл начался')
-    logging.info('Цикл начался')
     while True:
         time = datetime.now().hour
         if time==6 and x==6:
