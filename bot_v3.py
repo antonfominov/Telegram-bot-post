@@ -129,10 +129,15 @@ async def send_status(message: types.Message):
     with open('app.log', 'rb') as doc:
         await message.reply_document(doc)
 
-@dp.message_handler(commands=['test'])
-async def send_test(message: types.Message):
-    logging.info(message)
-    await asyncio.create_task(add_gif(datetime.now()))
+#@dp.message_handler(commands=['test'])
+#async def send_test(message: types.Message):
+#    logging.info(message)
+#    await asyncio.create_task(add_gif(datetime.now()))
+
+@dp.message_handler(content_types=ContentType.VIDEO | ContentType.DOCUMENT)
+async def audio_handler(message: types.Message):
+    file_id = message.video.file_id
+    await bot.send_message(217897385, 'Видео отправлено')
 
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
