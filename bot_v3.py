@@ -1,9 +1,11 @@
-from aiogram import Bot, Dispatcher, executor, types, asyncio
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.filters import Command
+from aiogram.types import FSInputFile
 
-import os
+import asyncio
+
 import glob
 from datetime import datetime
-import time
 import logging
 import configparser
 
@@ -24,35 +26,35 @@ SILENTGIRL_PATH = config["GIRL"]["PATH"]
 logging.basicConfig(filename='app.log', level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 x=0
 
 async def add_photo(channel, path):
     try:
         filename_list = glob.glob(path)
         filename = filename_list[0]
-        file = open(filename, 'rb')
+        file = FSInputFile(filename)
     except Exception:
-        print(f'Директория пуста: {path}')
         logging.info(f'Директория пуста: {path}')
+        print(f'Директория пуста: {path}')
     else:
         if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-            await bot.send_photo(channel, file)
-        elif filename.lower().endswith('.gif'):
+            await bot.send_photo(channel, file) 
+        elif filename.lower().endswith(('.gif', '.mp4')):
             await bot.send_animation(channel, file)
         logging.info('Пост опубликован')
         file.close()
-        os.remove(filename)
+        #os.remove(filename)
 
-async def add_gif(time):
-    filename_list = glob.glob(path)
-    filename = filename_list[0]
-    photo = open(filename, 'rb')
-    logging.info('Пост опубликован')
-    await bot.send_animation(FAKEHUB_ID, photo, caption=time)
-    photo.close()
-    os.remove(filename)
-    
+# async def add_gif(time):
+#     filename_list = glob.glob(path)
+#     filename = filename_list[0]
+#     photo = open(filename, 'rb')
+#     logging.info('Пост опубликован')
+#     await bot.send_animation(FAKEHUB_ID, photo, caption=time)
+#     photo.close()
+#     os.remove(filename)
+
 async def start_post(x):
     while True:
         time = datetime.now().hour
@@ -114,7 +116,7 @@ async def start_post(x):
             await asyncio.create_task(add_photo(FAKEHUB_ID, FAKEHUB_PATH))
         await asyncio.sleep(1200) #Работает! Можно попасть в бесконечный цикл
         
-@dp.message_handler(commands=['start', 'help'])
+@dp.message(Command(commands=['start', 'help']))
 async def send_welcome(message: types.Message):
     if 23 < datetime.now().hour < 6:
         x = 6
@@ -124,20 +126,24 @@ async def send_welcome(message: types.Message):
     logging.info('Постинг начался')
     await message.reply(f'Добро пожаловать {message.from_user.first_name}. Бот активирован')
 
-@dp.message_handler(commands=['status'])
+@dp.message(Command(commands=['status']))
 async def send_status(message: types.Message):
-    with open('app.log', 'rb') as doc:
-        await message.reply_document(doc)
+    file = FSInputFile('app.log')
+    await message.reply_document(file)
+    await file.close()
 
-#@dp.message_handler(commands=['test'])
-#async def send_test(message: types.Message):
-#    logging.info(message)
-#    await asyncio.create_task(add_gif(datetime.now()))
-
-@dp.message_handler(content_types=ContentType.VIDEO | ContentType.DOCUMENT)
-async def audio_handler(message: types.Message):
+@dp.message(F.video)
+async def video_handler(message: types.Message):
     file_id = message.video.file_id
-    await bot.send_message(217897385, 'Видео отправлено')
+    caption = f"{message.caption}" "\n" "#video"
+    #await bot.send_video(NINJAS_ID, file_id, caption=caption)
+    await bot.send_message(217897385, f'Видео отправлено {file_id}, подпись: {caption}')
+
+
+async def main():
+    bot = Bot(token=API_TOKEN)
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
